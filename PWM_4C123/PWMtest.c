@@ -114,13 +114,13 @@ void GPIOPortF_Handler(void){
 		//else if (status == 'G') status = 'R';
 		//Chagne speed logic
 		if      (speed ==  0){
-			speed = 25;
+			speed = 60;
 			status = lastStatus;
 			
 		}
-		else if (speed == 25) speed = 50;
-		else if (speed == 50) speed = 75;
-		else if (speed == 75) speed = 100;
+		else if (speed == 60) speed = 70;
+		else if (speed == 70) speed = 85;
+		else if (speed == 85) speed = 100;
 		else if (speed ==100){
 			speed = 0;
 			lastStatus = status;
