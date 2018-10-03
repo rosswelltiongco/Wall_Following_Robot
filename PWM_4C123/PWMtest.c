@@ -42,8 +42,8 @@ int main(void){
   PWM0B_Init(40000, 10000);         // initialize PWM0, 1000 Hz, 25% duty
 	
 	// Initialize pwm to 0
-	PWM0A_Duty(50);
-	PWM0B_Duty(20000); //100%
+	//PWM0A_Duty(50);
+	//PWM0B_Duty(20000); //100%
 
 
   while(1){
@@ -63,22 +63,13 @@ void delay(unsigned int seconds){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 // Todo: Make separate .h + .c file
 //Global variables
 int FallingEdges = 0;
 int last,current= 0;
 char status = 'R'; //Initialize to red status
+char lastStatus = 'G';
+unsigned int speed = 0;
 
 //Function Prototypes
 void PortF_Init(void);
@@ -115,16 +106,34 @@ void GPIOPortF_Handler(void){
 // RED LED indicates no robot motion
 // BLUE LED indicates backward direction
 // GREEN LED indicates forward direction
+	
   if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
     GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
-		if      (status == 'R') status = 'G';
-		else if (status == 'G') status = 'R';
+		//Change LED logic
+		//if      (status == 'R') status = 'G';
+		//else if (status == 'G') status = 'R';
+		//Chagne speed logic
+		if      (speed ==  0){
+			speed = 25;
+			status = lastStatus;
+			
+		}
+		else if (speed == 25) speed = 50;
+		else if (speed == 50) speed = 75;
+		else if (speed == 75) speed = 100;
+		else if (speed ==100){
+			speed = 0;
+			lastStatus = status;
+			status = 'R';
+		}
   }
   if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch (Direction)
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
 		if      (status == 'G') status = 'B';
 		else if (status == 'B') status = 'G';
+		//Flipl pin
 	}
+	PWM0A_Duty(speed);
 	Change_LED(status);
 }
 
