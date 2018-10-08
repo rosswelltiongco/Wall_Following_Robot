@@ -20,44 +20,30 @@
  For more information about my classes, my research, and my books, see
  http://users.ece.utexas.edu/~valvano/
  */
+
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 #include "PLL.h"
 #include "PWM.h"
 
-//Function Prototypes
-void GPIOPortF_Handler(void);
-void Change_LED(char color);
-void delay(unsigned int seconds);
-void Change_D_Polarity(void);
-void delay(unsigned int count);
-void WaitForInterrupt(void);  // low power mode
+// Function prototypes
 void PortF_Init(void);
-void Init_PortD(void);
-void GPIOPortF_Handler(void);
-void Change_LED(char color);
+void PortD_Init(void);
 void delay(unsigned int seconds);
+void Change_LED(char color);
+void Change_D_Polarity(void);
 
-//Global variables
+// Global Variables
+int speed = 0;
 char status = 'R'; //Initialize to red status
-char lastStatus = 'G';
-unsigned int speed = 0;
-
+char lastStatus = 'G'; //Initialize to red status
 
 int main(void){
+	PortD_Init();
 	PortF_Init();
-	Init_PortD();
-  PLL_Init();                      // bus clock at 80 MHz
-  PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
+	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
-	speed = 0;
-	
   while(1){
-    //WaitForInterrupt();
-		PWM0A_Duty(speed);   
-		PWM0B_Duty(speed); 
-		speed+=25;
-		delay(1);
   }
 }
 
@@ -65,28 +51,11 @@ int main(void){
 void delay(unsigned int seconds){
 	unsigned long volatile time;
 	for (int i = 0; i < seconds; i ++){
-		time = 2*727240*50/91*10;  // ~1 sec
+		time = 727240*50/91*5;  // ~1 sec
 		while(time){
 			time--;
 		}
 	}
-}
-
-
-void Init_PortD(void){
-	unsigned int delay;
-  SYSCTL_RCGC2_R |= 0x00000008;     // 1) B clock
-  delay = SYSCTL_RCGC2_R;           // delay   
-  GPIO_PORTD_AMSEL_R = 0x00;        // 3) disable analog function
-  GPIO_PORTD_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
-  GPIO_PORTD_DIR_R = 0x0F;          // 5) PB2-output 
-  GPIO_PORTD_AFSEL_R = 0x00;        // 6) no alterna=te function
-  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
-	//Initialize polarities
-	GPIO_PORTD_DATA_R &=~0x02;
-	GPIO_PORTD_DATA_R |= 0x01;
-	GPIO_PORTD_DATA_R &=~0x04;
-	GPIO_PORTD_DATA_R |= 0x08;
 }
 
 void PortF_Init(void){    
@@ -109,7 +78,18 @@ void PortF_Init(void){
   GPIO_PORTF_IM_R |= 0x11;      // (f) arm interrupt on PF4
   NVIC_PRI7_R |= (NVIC_PRI7_R&0xFF00FFFF)|0x00A00000; // (g) priority 5
   NVIC_EN0_R |= 0x40000000;      // (h) enable interrupt 30 in NVIC
-	Change_LED(status); // Initialize to RED LED
+	Change_LED(status); // Initialize status led
+}
+
+void PortD_Init(void){
+	unsigned int delay;
+  SYSCTL_RCGC2_R |= 0x00000008;     // 1) B clock
+  delay = SYSCTL_RCGC2_R;           // delay   
+  GPIO_PORTD_AMSEL_R = 0x00;        // 3) disable analog function
+  GPIO_PORTD_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTD_DIR_R = 0x0F;          // 5) PB2-output 
+  GPIO_PORTD_AFSEL_R = 0x00;        // 6) no alterna=te function
+  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
 }
 
 void GPIOPortF_Handler(void){
@@ -120,11 +100,10 @@ void GPIOPortF_Handler(void){
 	
 	//Motor speeds: 0,60,70,85,100
   if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
-		/*
 		GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
 		if      (speed ==  0){
 			speed = 25;
-			//status = lastStatus;
+			status = lastStatus;
 			
 		}
 		else if (speed == 25) speed = 50;
@@ -132,27 +111,22 @@ void GPIOPortF_Handler(void){
 		else if (speed == 75) speed = 100;
 		else if (speed ==100){
 			speed = 0;
-			//lastStatus = status;
+			lastStatus = status;
 			status = 'R';
 		}
-		*/
   }
   if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch (Direction)
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
-		/*
 		if      (status == 'G'){
 			status = 'B';
 		}
 		else if (status == 'B'){
 			status = 'G';
 		}
-		*/
 	}
-	/*
 	PWM0A_Duty(speed);
 	PWM0B_Duty(speed);
 	Change_LED(status);
-	*/
 }
 
 void Change_LED(char color){
@@ -175,4 +149,3 @@ void Change_LED(char color){
 void Change_D_Polarity(void){
 	GPIO_PORTD_DATA_R = ~GPIO_PORTD_DATA_R;
 }
-
