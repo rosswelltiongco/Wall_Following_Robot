@@ -28,10 +28,10 @@
 
 // Function prototypes
 void PortF_Init(void);
-void PortD_Init(void);
+void PortB_Init(void);
 void delay(unsigned int seconds);
 void Change_LED(char color);
-void Change_D_Polarity(void);
+void Change_B_Polarity(void);
 
 // Global Variables
 int speed = 0;
@@ -39,7 +39,7 @@ char status = 'R'; //Initialize to red status
 char lastStatus = 'G'; //Initialize to red status
 
 int main(void){
-	PortD_Init();
+	PortB_Init();
 	PortF_Init();
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
@@ -81,15 +81,16 @@ void PortF_Init(void){
 	Change_LED(status); // Initialize status led
 }
 
-void PortD_Init(void){
+void PortB_Init(void){
 	unsigned int delay;
-  SYSCTL_RCGC2_R |= 0x00000008;     // 1) B clock
+  SYSCTL_RCGC2_R |= 0x00000002;     // 1) B clock
   delay = SYSCTL_RCGC2_R;           // delay   
-  GPIO_PORTD_AMSEL_R = 0x00;        // 3) disable analog function
-  GPIO_PORTD_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
-  GPIO_PORTD_DIR_R = 0x0F;          // 5) PB2-output 
-  GPIO_PORTD_AFSEL_R = 0x00;        // 6) no alterna=te function
-  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
+  GPIO_PORTB_AMSEL_R = 0x00;        // 3) disable analog function
+  GPIO_PORTB_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-output 
+  GPIO_PORTB_AFSEL_R = 0x00;        // 6) no alterna=te function
+  GPIO_PORTB_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
+	GPIO_PORTB_DATA_R = 0x05;          // 7) enable digital pins PB2-PB0    
 }
 
 void GPIOPortF_Handler(void){
@@ -119,9 +120,11 @@ void GPIOPortF_Handler(void){
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
 		if      (status == 'G'){
 			status = 'B';
+			Change_B_Polarity();
 		}
 		else if (status == 'B'){
 			status = 'G';
+			Change_B_Polarity();
 		}
 	}
 	PWM0A_Duty(speed);
@@ -146,6 +149,6 @@ void Change_LED(char color){
 	if (color == 'X') GPIO_PORTF_DATA_R = 0x00;
 }
 
-void Change_D_Polarity(void){
-	GPIO_PORTD_DATA_R = ~GPIO_PORTD_DATA_R;
+void Change_B_Polarity(void){
+	GPIO_PORTB_DATA_R = ~GPIO_PORTB_DATA_R;
 }
