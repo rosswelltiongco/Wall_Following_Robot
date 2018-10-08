@@ -22,6 +22,7 @@
  */
 
 #include "tm4c123gh6pm.h"
+#include "Nokia5110.h"
 #include <stdint.h>
 #include "PLL.h"
 #include "PWM.h"
@@ -32,6 +33,8 @@ void PortB_Init(void);
 void delay(unsigned int seconds);
 void Change_LED(char color);
 void Change_B_Polarity(void);
+void Display_Info(char status, int speed);
+
 
 // Global Variables
 unsigned int speed = 0;
@@ -42,8 +45,10 @@ char lastStatus = 'G'; //Initialize to red status
 int main(void){
 	PortB_Init();
 	PortF_Init();
+	Nokia5110_Init();
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
+	
   while(1){
   }
 }
@@ -119,6 +124,7 @@ void GPIOPortF_Handler(void){
 	PWM0A_Duty(speed);
 	PWM0B_Duty(speed);
 	Change_LED(status);
+	Display_Info(status, speed);
 }
 
 void Change_LED(char color){
@@ -140,4 +146,18 @@ void Change_LED(char color){
 
 void Change_B_Polarity(void){
 	GPIO_PORTB_DATA_R = ~GPIO_PORTB_DATA_R;
+}
+
+void Display_Info(char status, int speed){
+	Nokia5110_Clear();
+  Nokia5110_OutString("DIR    ");
+	
+	if      (status == 'R') Nokia5110_OutChar('S');
+	else if (status == 'G') Nokia5110_OutChar('F');
+	else if (status == 'B') Nokia5110_OutChar('B');
+	else    								Nokia5110_OutChar('?');
+	
+	Nokia5110_SetCursor(0,2);
+	Nokia5110_OutString("PWM");
+	Nokia5110_OutUDec(speed);
 }
