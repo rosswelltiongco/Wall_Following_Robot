@@ -425,16 +425,6 @@
               <FileType>1</FileType>
               <FilePath>.\PWMtest.c</FilePath>
             </File>
-            <File>
-              <FileName>Onboard.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Onboard.c</FilePath>
-            </File>
-            <File>
-              <FileName>Onboard.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Onboard.h</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>

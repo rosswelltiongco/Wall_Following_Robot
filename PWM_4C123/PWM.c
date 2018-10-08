@@ -72,7 +72,7 @@ void PWM0A_Duty(uint16_t duty){
 //                = BusClock/2 
 //                = 80 MHz/2 = 40 MHz (in this example)
 // Output on PB7/M0PWM1
-void PWM0B_Init(uint16_t period, uint16_t duty){
+void PWM0B_Init(uint16_t period){
   volatile unsigned long delay;
   SYSCTL_RCGCPWM_R |= 0x01;             // 1) activate PWM0
   SYSCTL_RCGCGPIO_R |= 0x02;            // 2) activate port B
@@ -90,14 +90,14 @@ void PWM0B_Init(uint16_t period, uint16_t duty){
   // PB7 goes low on LOAD
   // PB7 goes high on CMPB down
   PWM0_0_LOAD_R = period - 1;           // 5) cycles needed to count down to 0
-  PWM0_0_CMPB_R = duty - 1;             // 6) count value when output rises
+  PWM0_0_CMPB_R = 0;             // 6) count value when output rises
   PWM0_0_CTL_R |= 0x00000001;           // 7) start PWM0
   PWM0_ENABLE_R |= 0x00000002;          // enable PB7/M0PWM1
 }
 // change duty cycle of PB7
 // duty is number of PWM clock cycles output is high  (2<=duty<=period-1)
 void PWM0B_Duty(uint16_t duty){
-  PWM0_0_CMPB_R = duty - 2;             // 6) count value when output rises
+  PWM0_0_CMPB_R = (40000*(duty*0.01)) - 2;             // 6) count value when output rises
 }
 
 //  Function call samples

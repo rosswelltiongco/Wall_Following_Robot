@@ -29,25 +29,38 @@ void delay(unsigned int count);
 void WaitForInterrupt(void);  // low power mode
 
 void PortF_Init(void);
+void Init_PortD(void);
+void GPIOPortF_Handler(void);
+void Change_LED(char color);
+void delay(unsigned int seconds);
+// Todo: Make separate .h + .c file
+//Global variables
+char status = 'R'; //Initialize to red status
+char lastStatus = 'G';
+unsigned int speed = 0;
+unsigned int direction = 1; //Forward by default
+
+//Function Prototypes
 void GPIOPortF_Handler(void);
 void Change_LED(char color);
 void delay(unsigned int seconds);
 
 
-
 int main(void){
 	PortF_Init();
+	Init_PortD();
   PLL_Init();                      // bus clock at 80 MHz
   PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
-  PWM0B_Init(40000, 10000);         // initialize PWM0, 1000 Hz, 25% duty
-	
+  PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
+	PWM0A_Duty(20);
+	PWM0B_Duty(80);
 	// Initialize pwm to 0
 	//PWM0A_Duty(50);
 	//PWM0B_Duty(20000); //100%
-
+	
 
   while(1){
-    WaitForInterrupt();
+    //WaitForInterrupt();
   }
 }
 
@@ -63,19 +76,16 @@ void delay(unsigned int seconds){
 }
 
 
-// Todo: Make separate .h + .c file
-//Global variables
-int FallingEdges = 0;
-int last,current= 0;
-char status = 'R'; //Initialize to red status
-char lastStatus = 'G';
-unsigned int speed = 0;
-
-//Function Prototypes
-void PortF_Init(void);
-void GPIOPortF_Handler(void);
-void Change_LED(char color);
-void delay(unsigned int seconds);
+void Init_PortD(void){
+	unsigned int delay;
+  SYSCTL_RCGC2_R |= 0x00000008;     // 1) B clock
+  delay = SYSCTL_RCGC2_R;           // delay   
+  GPIO_PORTD_AMSEL_R = 0x00;        // 3) disable analog function
+  GPIO_PORTD_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTD_DIR_R = 0x0F;          // 5) PB2-output 
+  GPIO_PORTD_AFSEL_R = 0x00;        // 6) no alterna=te function
+  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0     
+}
 
 void PortF_Init(void){    
 	volatile unsigned long delay;
@@ -100,7 +110,6 @@ void PortF_Init(void){
 	Change_LED(status); // Initialize to RED LED
 }
 
-
 void GPIOPortF_Handler(void){
 // Dual push button ISR
 // RED LED indicates no robot motion
@@ -109,10 +118,6 @@ void GPIOPortF_Handler(void){
 	
   if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
     GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
-		//Change LED logic
-		//if      (status == 'R') status = 'G';
-		//else if (status == 'G') status = 'R';
-		//Chagne speed logic
 		if      (speed ==  0){
 			speed = 60;
 			status = lastStatus;
@@ -129,9 +134,14 @@ void GPIOPortF_Handler(void){
   }
   if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch (Direction)
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
-		if      (status == 'G') status = 'B';
-		else if (status == 'B') status = 'G';
-		//Flipl pin
+		if      (status == 'G'){
+			GPIO_PORTD_DATA_R = 0x01;
+			status = 'B';
+		}
+		else if (status == 'B'){
+			GPIO_PORTD_DATA_R = 0x02;
+			status = 'G';
+		}
 	}
 	PWM0A_Duty(speed);
 	Change_LED(status);
