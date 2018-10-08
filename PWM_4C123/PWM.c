@@ -100,19 +100,3 @@ void PWM0B_Duty(uint16_t duty){
   PWM0_0_CMPB_R = (40000*(duty*0.01)) - 2;             // 6) count value when output rises
 }
 
-//  Function call samples
-
-//  PWM0A_Duty(4000);    //  10%
-//  PWM0A_Duty(10000);   //  25%
-//  PWM0A_Duty(30000);   //  75%
-//  PWM0A_Duty(2000);    //  75%
-//  PWM0B_Duty(4000);    //  10%
-//  PWM0B_Duty(10000);   //  25%
-//  PWM0A_Init(4000, 2000);         // initialize PWM0, 10000 Hz, 50% duty
-//  PWM0A_Init(1000, 900);          // initialize PWM0, 40000 Hz, 90% duty
-//  PWM0A_Init(1000, 100);          // initialize PWM0, 40000 Hz, 10% duty
-//  PWM0A_Init(40, 20);             // initialize PWM0, 1 MHz, 50% duty
-//  PWM0B_Init(4000, 2000);         // initialize PWM0, 10000 Hz, 50% duty
-//  PWM0B_Init(1000, 900);          // initialize PWM0, 40000 Hz, 90% duty
-//  PWM0B_Init(1000, 100);          // initialize PWM0, 40000 Hz, 10% duty
-//  PWM0B_Init(40, 20);             // initialize PWM0, 1 MHz, 50% duty

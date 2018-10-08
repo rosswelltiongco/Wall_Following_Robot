@@ -25,25 +25,23 @@
 #include "PLL.h"
 #include "PWM.h"
 
+//Function Prototypes
+void GPIOPortF_Handler(void);
+void Change_LED(char color);
+void delay(unsigned int seconds);
+void Change_D_Polarity(void);
 void delay(unsigned int count);
 void WaitForInterrupt(void);  // low power mode
-
 void PortF_Init(void);
 void Init_PortD(void);
 void GPIOPortF_Handler(void);
 void Change_LED(char color);
 void delay(unsigned int seconds);
-// Todo: Make separate .h + .c file
+
 //Global variables
 char status = 'R'; //Initialize to red status
 char lastStatus = 'G';
 unsigned int speed = 0;
-unsigned int direction = 1; //Forward by default
-
-//Function Prototypes
-void GPIOPortF_Handler(void);
-void Change_LED(char color);
-void delay(unsigned int seconds);
 
 
 int main(void){
@@ -52,15 +50,14 @@ int main(void){
   PLL_Init();                      // bus clock at 80 MHz
   PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
-	PWM0A_Duty(20);
-	PWM0B_Duty(80);
-	// Initialize pwm to 0
-	//PWM0A_Duty(50);
-	//PWM0B_Duty(20000); //100%
+	speed = 0;
 	
-
   while(1){
     //WaitForInterrupt();
+		PWM0A_Duty(speed);   
+		PWM0B_Duty(speed); 
+		speed+=25;
+		delay(1);
   }
 }
 
@@ -84,7 +81,12 @@ void Init_PortD(void){
   GPIO_PORTD_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
   GPIO_PORTD_DIR_R = 0x0F;          // 5) PB2-output 
   GPIO_PORTD_AFSEL_R = 0x00;        // 6) no alterna=te function
-  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0     
+  GPIO_PORTD_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
+	//Initialize polarities
+	GPIO_PORTD_DATA_R &=~0x02;
+	GPIO_PORTD_DATA_R |= 0x01;
+	GPIO_PORTD_DATA_R &=~0x04;
+	GPIO_PORTD_DATA_R |= 0x08;
 }
 
 void PortF_Init(void){    
@@ -116,39 +118,45 @@ void GPIOPortF_Handler(void){
 // BLUE LED indicates backward direction
 // GREEN LED indicates forward direction
 	
+	//Motor speeds: 0,60,70,85,100
   if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
-    GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
+		/*
+		GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
 		if      (speed ==  0){
-			speed = 60;
-			status = lastStatus;
+			speed = 25;
+			//status = lastStatus;
 			
 		}
-		else if (speed == 60) speed = 70;
-		else if (speed == 70) speed = 85;
-		else if (speed == 85) speed = 100;
+		else if (speed == 25) speed = 50;
+		else if (speed == 50) speed = 75;
+		else if (speed == 75) speed = 100;
 		else if (speed ==100){
 			speed = 0;
-			lastStatus = status;
+			//lastStatus = status;
 			status = 'R';
 		}
+		*/
   }
   if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch (Direction)
     GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
+		/*
 		if      (status == 'G'){
-			GPIO_PORTD_DATA_R = 0x01;
 			status = 'B';
 		}
 		else if (status == 'B'){
-			GPIO_PORTD_DATA_R = 0x02;
 			status = 'G';
 		}
+		*/
 	}
+	/*
 	PWM0A_Duty(speed);
+	PWM0B_Duty(speed);
 	Change_LED(status);
+	*/
 }
 
 void Change_LED(char color){
-	//Port F Onboard LED Color Codes
+	// Port F Onboard LED Color Codes
 	// Color    LED(s) PortF
 	// dark     ---    0
 	// red      R--    0x02
@@ -163,3 +171,8 @@ void Change_LED(char color){
 	if (color == 'G') GPIO_PORTF_DATA_R = 0x08;
 	if (color == 'X') GPIO_PORTF_DATA_R = 0x00;
 }
+
+void Change_D_Polarity(void){
+	GPIO_PORTD_DATA_R = ~GPIO_PORTD_DATA_R;
+}
+
