@@ -34,7 +34,8 @@ void Change_LED(char color);
 void Change_B_Polarity(void);
 
 // Global Variables
-int speed = 0;
+unsigned int speed = 0;
+unsigned int speedValues[] = {0, 25, 50, 75, 100};
 char status = 'R'; //Initialize to red status
 char lastStatus = 'G'; //Initialize to red status
 
@@ -45,17 +46,6 @@ int main(void){
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
   while(1){
   }
-}
-
-
-void delay(unsigned int seconds){
-	unsigned long volatile time;
-	for (int i = 0; i < seconds; i ++){
-		time = 727240*50/91*5;  // ~1 sec
-		while(time){
-			time--;
-		}
-	}
 }
 
 void PortF_Init(void){    
@@ -90,7 +80,7 @@ void PortB_Init(void){
   GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-output 
   GPIO_PORTB_AFSEL_R = 0x00;        // 6) no alterna=te function
   GPIO_PORTB_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
-	GPIO_PORTB_DATA_R = 0x05;          // 7) enable digital pins PB2-PB0    
+	GPIO_PORTB_DATA_R = 0x05;          // Initialize PB0, PB2 high
 }
 
 void GPIOPortF_Handler(void){
@@ -102,16 +92,15 @@ void GPIOPortF_Handler(void){
 	//Motor speeds: 0,60,70,85,100
   if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
 		GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
-		if      (speed ==  0){
-			speed = 25;
+		if      (speed ==  speedValues[0]){
+			speed = speedValues[1];
 			status = lastStatus;
-			
 		}
-		else if (speed == 25) speed = 50;
-		else if (speed == 50) speed = 75;
-		else if (speed == 75) speed = 100;
-		else if (speed ==100){
-			speed = 0;
+		else if (speed == speedValues[1]) speed = speedValues[2];
+		else if (speed == speedValues[2]) speed = speedValues[3];
+		else if (speed == speedValues[3]) speed = speedValues[4];
+		else if (speed ==speedValues[4]){
+			speed = speedValues[0];
 			lastStatus = status;
 			status = 'R';
 		}
