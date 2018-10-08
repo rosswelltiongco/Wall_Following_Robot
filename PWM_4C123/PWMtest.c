@@ -48,7 +48,7 @@ int main(void){
 	Nokia5110_Init();
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
-	
+	Display_Info(status, speed);
   while(1){
   }
 }
