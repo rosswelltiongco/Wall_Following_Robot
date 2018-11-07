@@ -62,7 +62,7 @@ void PWM0A_Init(uint16_t period){
 }
 // change duty cycle of PB6
 // duty is number of PWM clock cycles output is high  (2<=duty<=period-1)
-void PWM0A_Duty(uint16_t duty){
+void PWM0A_Duty(unsigned int duty){
   PWM0_0_CMPA_R = (40000*(duty*0.01)) - 2;             // 6) count value when output rises
 }
 // period is 16-bit number of PWM clock cycles in one period (3<=period)
@@ -96,7 +96,7 @@ void PWM0B_Init(uint16_t period){
 }
 // change duty cycle of PB7
 // duty is number of PWM clock cycles output is high  (2<=duty<=period-1)
-void PWM0B_Duty(uint16_t duty){
+void PWM0B_Duty(unsigned int duty){
   PWM0_0_CMPB_R = (40000*(duty*0.01)) - 2;             // 6) count value when output rises
 }
 

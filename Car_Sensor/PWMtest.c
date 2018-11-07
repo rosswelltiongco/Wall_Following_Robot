@@ -26,14 +26,14 @@
 #include <stdint.h>
 #include "PLL.h"
 #include "PWM.h"
+#include "ADCSWTrigger.h"
 
 // Function prototypes
 void PortF_Init(void);
 void PortB_Init(void);
-void delay(unsigned int seconds);
-void Change_LED(char color);
+void delay(unsigned long int time);
 void Change_B_Polarity(void);
-void Display_Info(char status, int speed);
+void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2 );
 
 
 // Global Variables
@@ -42,14 +42,48 @@ unsigned int speedValues[] = {0, 25, 50, 75, 100};
 char status = 'R'; //Initialize to red status
 char lastStatus = 'G'; //Initialize to red status
 
+unsigned int getPercent(unsigned long ADCvalue){
+	unsigned pct = ADCvalue/40;
+	if (pct >= 100)	pct = 100;
+	return pct;
+}
+
+unsigned int getCm(unsigned long ADCvalue){
+	return 2.1955322 + 38701.8148/ADCvalue;
+}
+
+void delay(unsigned long int time)    // This function provides delay in terms of seconds
+{
+		//Roughly 1 second delay on 16MHz TM4C
+    unsigned char i,j,k,l;
+ 
+    for(i = 0; i < time; i++){
+        for(j=0; j<250; j++){
+					for(k=0; k< 250; k++){
+						for (l=0; l< 60; l++){
+						}
+					}
+				}
+		}
+}
+
 int main(void){
+	unsigned long potentiometer, sensor1, sensor2, percent;
+	ADC_Init298();
 	PortB_Init();
 	PortF_Init();
 	Nokia5110_Init();
-	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz, 75% duty
-  PWM0B_Init(40000);         // initialize PWM0, 1000 Hz, 25% duty
-	Display_Info(status, speed);
+	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz
+  PWM0B_Init(40000);         // initialize PWM0, 1000 Hz
+	PLL_Init();           // bus clock at 80 MHz
   while(1){
+		//ReadADCMedianFilter(&ahead, &frwdright, &frwdleft);
+		ADC_In298(&potentiometer, &sensor1, &sensor2); // sample AIN2(PE1), AIN9 (PE4), AIN8 (PE5)
+		Display_Info(potentiometer, sensor1, sensor2);
+		percent = getPercent(potentiometer);
+		delay(1);
+		PWM0A_Duty(percent);
+		PWM0B_Duty(percent);
   }
 }
 
@@ -73,7 +107,6 @@ void PortF_Init(void){
   GPIO_PORTF_IM_R |= 0x11;      // (f) arm interrupt on PF4
   NVIC_PRI7_R |= (NVIC_PRI7_R&0xFF00FFFF)|0x00A00000; // (g) priority 5
   NVIC_EN0_R |= 0x40000000;      // (h) enable interrupt 30 in NVIC
-	Change_LED(status); // Initialize status led
 }
 
 void PortB_Init(void){
@@ -85,79 +118,28 @@ void PortB_Init(void){
   GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-output 
   GPIO_PORTB_AFSEL_R = 0x00;        // 6) no alterna=te function
   GPIO_PORTB_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
-	GPIO_PORTB_DATA_R = 0x05;          // Initialize PB0, PB2 high
+	//GPIO_PORTB_DATA_R = 0x05;          // Initialize PB0, PB2 high
 }
 
-void GPIOPortF_Handler(void){
-// Dual push button ISR
-// RED LED indicates no robot motion
-// BLUE LED indicates backward direction
-// GREEN LED indicates forward direction
+
+
+void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2){
+	unsigned int percent = getPercent(potentiometer);
+	Nokia5110_Clear();
+  Nokia5110_OutString("R:");
+	Nokia5110_OutUDec(getCm(sensor1));
 	
-	//Motor speeds: 0,60,70,85,100
-  if(GPIO_PORTF_RIS_R&0x01){  // SW2 touch (Speed)
-		GPIO_PORTF_ICR_R = 0x01;  // acknowledge flag0
-		if      (speed ==  speedValues[0]){
-			speed = speedValues[1];
-			status = lastStatus;
-		}
-		else if (speed == speedValues[1]) speed = speedValues[2];
-		else if (speed == speedValues[2]) speed = speedValues[3];
-		else if (speed == speedValues[3]) speed = speedValues[4];
-		else if (speed ==speedValues[4]){
-			speed = speedValues[0];
-			lastStatus = status;
-			status = 'R';
-		}
-  }
-  if(GPIO_PORTF_RIS_R&0x10){  // SW1 touch (Direction)
-    GPIO_PORTF_ICR_R = 0x10;  // acknowledge flag4
-		if      (status == 'G'){
-			status = 'B';
-			Change_B_Polarity();
-		}
-		else if (status == 'B'){
-			status = 'G';
-			Change_B_Polarity();
-		}
-	}
-	PWM0A_Duty(speed);
-	PWM0B_Duty(speed);
-	Change_LED(status);
-	Display_Info(status, speed);
+	Nokia5110_SetCursor(0, 2);
+	Nokia5110_OutString("L:");
+	Nokia5110_OutUDec(getCm(sensor2));
+	
+	Nokia5110_SetCursor(0, 4);
+	Nokia5110_OutString("PWM");
+	Nokia5110_OutUDec(percent);
 }
 
-void Change_LED(char color){
-	// Port F Onboard LED Color Codes
-	// Color    LED(s) PortF
-	// dark     ---    0
-	// red      R--    0x02
-	// blue     --B    0x04
-	// green    -G-    0x08
-	// yellow   RG-    0x0A
-	// sky blue -GB    0x0C	
-	// white    RGB    0x0E
-	// pink     R-B    0x06
-	if (color == 'R') GPIO_PORTF_DATA_R = 0x02;
-	if (color == 'B') GPIO_PORTF_DATA_R = 0x04;
-	if (color == 'G') GPIO_PORTF_DATA_R = 0x08;
-	if (color == 'X') GPIO_PORTF_DATA_R = 0x00;
-}
 
+// Unused functions for future use
 void Change_B_Polarity(void){
 	GPIO_PORTB_DATA_R = ~GPIO_PORTB_DATA_R;
-}
-
-void Display_Info(char status, int speed){
-	Nokia5110_Clear();
-  Nokia5110_OutString("DIR    ");
-	
-	if      (status == 'R') Nokia5110_OutChar('S');
-	else if (status == 'G') Nokia5110_OutChar('F');
-	else if (status == 'B') Nokia5110_OutChar('B');
-	else    								Nokia5110_OutChar('?');
-	
-	Nokia5110_SetCursor(0,2);
-	Nokia5110_OutString("PWM");
-	Nokia5110_OutUDec(speed);
 }

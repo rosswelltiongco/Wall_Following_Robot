@@ -211,8 +211,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\PLL.c</PathWithFileName>
       <FilenameWithoutPath>PLL.c</FilenameWithoutPath>
@@ -225,10 +225,10 @@
       <FileType>1</FileType>
       <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>12</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>61</TopLine>
-      <CurrentLine>103</CurrentLine>
+      <CurrentLine>75</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWM.c</PathWithFileName>
       <FilenameWithoutPath>PWM.c</FilenameWithoutPath>
@@ -241,13 +241,45 @@
       <FileType>1</FileType>
       <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>41</ColumnNumber>
+      <ColumnNumber>25</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>28</TopLine>
-      <CurrentLine>38</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>29</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWMtest.c</PathWithFileName>
       <FilenameWithoutPath>PWMtest.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>5</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <ColumnNumber>11</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>259</TopLine>
+      <CurrentLine>40</CurrentLine>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\Nokia5110.c</PathWithFileName>
+      <FilenameWithoutPath>Nokia5110.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>6</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <ColumnNumber>10</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>34</TopLine>
+      <CurrentLine>25</CurrentLine>
+      <bDave2>0</bDave2>
+      <PathWithFileName>.\ADCSWTrigger.c</PathWithFileName>
+      <FilenameWithoutPath>ADCSWTrigger.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
