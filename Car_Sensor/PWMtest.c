@@ -67,6 +67,30 @@ void delay(unsigned long int time)    // This function provides delay in terms o
 		}
 }
 
+unsigned int getAbs(int n) 
+{ 
+  int const mask = n >> (sizeof(int) * 8 - 1); 
+  return ((n + mask) ^ mask); 
+} 
+
+unsigned int getLookup(unsigned long ADCvalue){
+	//innaccurate after 45cm
+	int adcOutput[15] = {2930, 2144, 1640, 1350, 1150,  928,  900, 880, 840, 790, 650, 630, 530};
+	int distance[15] =  {  10,   15,   20,   25,   30,   35,   40,  45,  50,  55,  60,  65,  70};
+	unsigned int closest = getAbs(ADCvalue-adcOutput[0]);
+	unsigned int val = distance[0];
+	unsigned int i = 0;
+	
+	for (i = 0; i < 15; i++){
+		if (  (getAbs(adcOutput[i]-ADCvalue)) < closest ){
+				closest = getAbs(ADCvalue-adcOutput[i]);
+				val = distance[i];
+		}
+	}
+	return val;
+}
+
+
 int main(void){
 	unsigned long potentiometer, sensor1, sensor2, percent;
 	ADC_Init298();
@@ -126,12 +150,12 @@ void PortB_Init(void){
 void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2){
 	unsigned int percent = getPercent(potentiometer);
 	Nokia5110_Clear();
-  Nokia5110_OutString("R:");
-	Nokia5110_OutUDec(getCm(sensor1));
+  Nokia5110_OutString("L:");
+	Nokia5110_OutUDec(getLookup(sensor1));
 	
 	Nokia5110_SetCursor(0, 2);
-	Nokia5110_OutString("L:");
-	Nokia5110_OutUDec(getCm(sensor2));
+	Nokia5110_OutString("R:");
+	Nokia5110_OutUDec(getLookup(sensor2));
 	
 	Nokia5110_SetCursor(0, 4);
 	Nokia5110_OutString("PWM");
