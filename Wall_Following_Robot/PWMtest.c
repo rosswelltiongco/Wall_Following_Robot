@@ -105,9 +105,12 @@ int main(void){
 		ADC_In298(&potentiometer, &sensor1, &sensor2); // sample AIN2(PE1), AIN9 (PE4), AIN8 (PE5)
 		Display_Info(potentiometer, sensor1, sensor2);
 		percent = getPercent(potentiometer);
-		delay(1);
 		PWM0A_Duty(percent);
 		PWM0B_Duty(percent);
+		PWM0A_Duty(100);
+		PWM0B_Duty(100);
+		Change_B_Polarity();
+		delay(3);
   }
 }
 
@@ -139,10 +142,10 @@ void PortB_Init(void){
   delay = SYSCTL_RCGC2_R;           // delay   
   GPIO_PORTB_AMSEL_R = 0x00;        // 3) disable analog function
   GPIO_PORTB_PCTL_R = 0x00000000;   // 4) GPIO clear bit PCTL  
-  GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-output 
+  GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-PB0 output 
   GPIO_PORTB_AFSEL_R = 0x00;        // 6) no alterna=te function
   GPIO_PORTB_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
-	//GPIO_PORTB_DATA_R = 0x05;          // Initialize PB0, PB2 high
+	GPIO_PORTB_DATA_R = 0x08;          // Initialize PB0 high, PB1 kept low
 }
 
 
@@ -151,19 +154,20 @@ void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned l
 	unsigned int percent = getPercent(potentiometer);
 	Nokia5110_Clear();
   Nokia5110_OutString("L:");
-	Nokia5110_OutUDec(getLookup(sensor1));
+	Nokia5110_OutUDec(getCm(sensor1));
 	
 	Nokia5110_SetCursor(0, 2);
 	Nokia5110_OutString("R:");
-	Nokia5110_OutUDec(getLookup(sensor2));
+	Nokia5110_OutUDec(getCm(sensor2));
 	
 	Nokia5110_SetCursor(0, 4);
 	Nokia5110_OutString("PWM");
 	Nokia5110_OutUDec(percent);
+	delay(1);
 }
 
 
 // Unused functions for future use
 void Change_B_Polarity(void){
-	GPIO_PORTB_DATA_R = ~GPIO_PORTB_DATA_R;
+	GPIO_PORTB_DATA_R ^= 0x0C;
 }
