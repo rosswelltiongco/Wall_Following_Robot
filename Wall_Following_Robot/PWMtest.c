@@ -107,8 +107,6 @@ int main(void){
 		percent = getPercent(potentiometer);
 		PWM0A_Duty(percent);
 		PWM0B_Duty(percent);
-		PWM0A_Duty(100);
-		PWM0B_Duty(100);
 		Change_B_Polarity();
 		delay(3);
   }
