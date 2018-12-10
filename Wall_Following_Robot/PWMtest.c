@@ -100,15 +100,43 @@ int main(void){
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz
 	PLL_Init();           // bus clock at 80 MHz
+	
+	delay(5); //Delay to start
+	// Initialize speeds based on potentiometer
+	signed int leftSpeed = getPercent(potentiometer);
+	signed int rightSpeed = getPercent(potentiometer);
+	
   while(1){
+		// TODO: Filter signals
 		//ReadADCMedianFilter(&ahead, &frwdright, &frwdleft);
 		ADC_In298(&potentiometer, &sensor1, &sensor2); // sample AIN2(PE1), AIN9 (PE4), AIN8 (PE5)
-		Display_Info(potentiometer, sensor1, sensor2);
-		percent = getPercent(potentiometer);
-		PWM0A_Duty(percent);
-		PWM0B_Duty(percent);
-		Change_B_Polarity();
-		delay(3);
+		//Display_Info(potentiometer, sensor1, sensor2);
+		
+		unsigned int leftDistance = getCm(sensor1);
+		unsigned int rightDistance = getCm(sensor2);
+		if (leftDistance > rightDistance){
+			leftSpeed  -= 25;
+			rightSpeed += 25;
+		}
+		else if (leftDistance < rightDistance){
+			leftSpeed  += 25;
+			rightSpeed -= 25;
+		}
+		else if (getAbs(leftDistance - rightDistance) < 10){
+			//Don't change if not big enough
+		}
+		else{
+		}
+		
+		// Preventing speeds from going out of bounds (0/100)
+		if (leftSpeed  >  100) leftSpeed  = 100;
+		if (leftSpeed  <=   0) leftSpeed  =   0;
+		if (rightSpeed >  100) rightSpeed = 100;
+		if (rightSpeed <=   0) rightSpeed =   0;
+		Display_Info(potentiometer,leftSpeed ,rightSpeed);
+		
+		PWM0A_Duty(leftSpeed);
+		PWM0B_Duty(rightSpeed);
   }
 }
 
@@ -149,6 +177,7 @@ void PortB_Init(void){
 
 
 void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2){
+	/*
 	unsigned int percent = getPercent(potentiometer);
 	Nokia5110_Clear();
   Nokia5110_OutString("L:");
@@ -162,6 +191,21 @@ void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned l
 	Nokia5110_OutString("PWM");
 	Nokia5110_OutUDec(percent);
 	delay(1);
+	*/
+	unsigned int percent = getPercent(potentiometer);
+	Nokia5110_Clear();
+  Nokia5110_OutString("L:");
+	Nokia5110_OutUDec((sensor1));
+	
+	Nokia5110_SetCursor(0, 2);
+	Nokia5110_OutString("R:");
+	Nokia5110_OutUDec((sensor2));
+	
+	Nokia5110_SetCursor(0, 4);
+	Nokia5110_OutString("PWM");
+	Nokia5110_OutUDec(percent);
+	delay(1);
+	
 }
 
 

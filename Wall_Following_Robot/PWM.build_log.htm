@@ -12,16 +12,18 @@ assembling startup.s...
 compiling PLL.c...
 compiling PWM.c...
 compiling PWMtest.c...
-PWMtest.c(138): warning:  #550-D: variable "delay" was set but never used
+PWMtest.c(95): warning:  #177-D: variable "percent" was declared but never referenced
+        unsigned long potentiometer, sensor1, sensor2, percent;
+PWMtest.c(167): warning:  #550-D: variable "delay" was set but never used
         unsigned int delay;
-PWMtest.c(171): warning:  #1-D: last line of file ends without a newline
+PWMtest.c(216): warning:  #1-D: last line of file ends without a newline
   }
-PWMtest.c: 2 warnings, 0 errors
+PWMtest.c: 3 warnings, 0 errors
 compiling Nokia5110.c...
 compiling ADCSWTrigger.c...
 linking...
-Program Size: Code=5764 RO-data=496 RW-data=0 ZI-data=1120  
-".\PWM.axf" - 0 Error(s), 2 Warning(s).
+Program Size: Code=5804 RO-data=496 RW-data=0 ZI-data=1120  
+".\PWM.axf" - 0 Error(s), 3 Warning(s).
 Load "C:\\Users\\Rosswell\\Documents\\Wall_Following_Robot\\Wall_Following_Robot\\PWM.axf" 
 Connecting: Mode=JTAG, Speed=1000000Hz
 Erase Done.
@@ -30,3 +32,9 @@ Verify OK.
 </pre>
 </body>
 </html>
+rget DLL has been cancelled
+Load "C:\\Users\\Rosswell\\Documents\\Wall_Following_Robot\\Wall_Following_Robot\\PWM.axf" 
+Connecting: Mode=JTAG, Speed=1000000Hz
+Erase Done.
+Programming Done.
+Verify OK.
