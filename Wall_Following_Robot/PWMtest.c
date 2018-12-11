@@ -101,7 +101,6 @@ int main(void){
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz
 	PLL_Init();           // bus clock at 80 MHz
 	
-	delay(5); //Delay to start
 	// Initialize speeds based on potentiometer
 	signed int leftSpeed = getPercent(potentiometer);
 	signed int rightSpeed = getPercent(potentiometer);
@@ -114,29 +113,11 @@ int main(void){
 		
 		unsigned int leftDistance = getCm(sensor1);
 		unsigned int rightDistance = getCm(sensor2);
-		if (leftDistance > rightDistance){
-			leftSpeed  -= 25;
-			rightSpeed += 25;
-		}
-		else if (leftDistance < rightDistance){
-			leftSpeed  += 25;
-			rightSpeed -= 25;
-		}
-		else if (getAbs(leftDistance - rightDistance) < 10){
-			//Don't change if not big enough
-		}
-		else{
-		}
 		
-		// Preventing speeds from going out of bounds (0/100)
-		if (leftSpeed  >  100) leftSpeed  = 100;
-		if (leftSpeed  <=   0) leftSpeed  =   0;
-		if (rightSpeed >  100) rightSpeed = 100;
-		if (rightSpeed <=   0) rightSpeed =   0;
-		Display_Info(potentiometer,leftSpeed ,rightSpeed);
+		Display_Info(potentiometer,sensor1,sensor2);
 		
-		PWM0A_Duty(leftSpeed);
-		PWM0B_Duty(rightSpeed);
+		PWM0A_Duty(0);
+		PWM0B_Duty(0);
   }
 }
 
