@@ -42,6 +42,24 @@ unsigned int speedValues[] = {0, 25, 50, 75, 100};
 char status = 'R'; //Initialize to red status
 char lastStatus = 'G'; //Initialize to red status
 
+// SENSOR VARIABLES
+float dist1, dist2;
+unsigned long ain1, ain2, ain3, dutyCycle;
+char sample=0;
+int adcTable[] = {4095, 3050, 1980, 1370, 950, 830, 730, 650, 570, 530, 460, 390, 330, 300, 0};
+int distTable[] = {0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 999};
+float distance_ADC = 0;  //  <---- THIS USE TO BE CALLed distance but is now changed to distance_ADC so be aware
+float calibration = 0;
+float a = 0;
+float b = 0;
+int ia = 0;
+int ib = 0;
+float m = 0;
+float l = 0;
+float lm;
+int i;
+int f;
+
 unsigned int getPercent(unsigned long ADCvalue){
 	unsigned pct = ADCvalue/40;
 	if (pct >= 100)	pct = 100;
@@ -106,15 +124,66 @@ int main(void){
 	signed int rightSpeed = getPercent(potentiometer);
 	
   while(1){
-		// TODO: Filter signals
-		//ReadADCMedianFilter(&ahead, &frwdright, &frwdleft);
-		ADC_In298(&potentiometer, &sensor1, &sensor2); // sample AIN2(PE1), AIN9 (PE4), AIN8 (PE5)
-		//Display_Info(potentiometer, sensor1, sensor2);
+		ADC_In298(&ain1, &ain2, &ain3); // Ensure sampler works
+		// ADC PART OF LOOP	
+			
+			//Update Sensors
+			// Find distance
+		for(i = 0; i < 15; i = i + 1){
+			if(ain1 > adcTable[i]){
+				break;
+			}
+			else{
+				a = adcTable[i+1];
+				ia = i+1;
+			}
+		}
+		
+		for(f = 0; f < 15; f = f + 1){
+			if(ain1 < adcTable[f]){
+				b = adcTable[f];
+				ib = f;
+			}
+			else {
+				break;
+			}
+		}
+		 m = b - a;
+		 l = b - ain1;
+		lm = l / m ;
+		
+		dist1 = distTable[ib] + (lm * 5);
+		// Find distance
+		for(i = 0; i < 15; i = i + 1){
+			if(ain2 > adcTable[i]){
+				break;
+			}
+			else{
+				a = adcTable[i+1];
+				ia = i+1;
+			}
+		}
+		
+		for(f = 0; f < 15; f = f + 1){
+			if(ain2 < adcTable[f]){
+				b = adcTable[f];
+				ib = f;
+			}
+			else {
+				break;
+			}
+		}
+		 m = b - a;
+		 l = b - ain2;
+		lm = l / m ;
+		
+		dist2 = distTable[ib] + (lm * 5);
+		// END ADC PART OF LOOP
 		
 		unsigned int leftDistance = getCm(sensor1);
 		unsigned int rightDistance = getCm(sensor2);
 		
-		Display_Info(potentiometer,sensor1,sensor2);
+		Display_Info(potentiometer,dist1,dist2);
 		
 		PWM0A_Duty(0);
 		PWM0B_Duty(0);
@@ -158,21 +227,6 @@ void PortB_Init(void){
 
 
 void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2){
-	/*
-	unsigned int percent = getPercent(potentiometer);
-	Nokia5110_Clear();
-  Nokia5110_OutString("L:");
-	Nokia5110_OutUDec(getCm(sensor1));
-	
-	Nokia5110_SetCursor(0, 2);
-	Nokia5110_OutString("R:");
-	Nokia5110_OutUDec(getCm(sensor2));
-	
-	Nokia5110_SetCursor(0, 4);
-	Nokia5110_OutString("PWM");
-	Nokia5110_OutUDec(percent);
-	delay(1);
-	*/
 	unsigned int percent = getPercent(potentiometer);
 	Nokia5110_Clear();
   Nokia5110_OutString("L:");

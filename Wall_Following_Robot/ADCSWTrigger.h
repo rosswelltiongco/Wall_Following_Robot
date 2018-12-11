@@ -66,9 +66,3 @@ void ADC_Init298(void);
 // ain9 (PE4) 0 to 4095
 // ain8 (PE5) 0 to 4095
 void ADC_In298(unsigned long *ain2, unsigned long *ain9, unsigned long *ain8);
-
-
-unsigned long median(unsigned long u1, unsigned long u2, unsigned long u3);
-
-void ReadADCMedianFilter(unsigned long *ain2, unsigned long *ain9, unsigned long *ain8);
-
