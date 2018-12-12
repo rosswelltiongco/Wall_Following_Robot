@@ -5,3 +5,4 @@
 .\pwmtest.o: PLL.h
 .\pwmtest.o: PWM.h
 .\pwmtest.o: ADCSWTrigger.h
+.\pwmtest.o: utils.h

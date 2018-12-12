@@ -27,6 +27,7 @@
 #include "PLL.h"
 #include "PWM.h"
 #include "ADCSWTrigger.h"
+#include "utils.h"
 
 // Function prototypes
 void PortF_Init(void);
@@ -44,21 +45,8 @@ char lastStatus = 'G'; //Initialize to red status
 
 // SENSOR VARIABLES
 float dist1, dist2;
-unsigned long ain1, ain2, ain3, dutyCycle;
-char sample=0;
-int adcTable[] = {4095, 3050, 1980, 1370, 950, 830, 730, 650, 570, 530, 460, 390, 330, 300, 0};
-int distTable[] = {0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 999};
-float distance_ADC = 0;  //  <---- THIS USE TO BE CALLed distance but is now changed to distance_ADC so be aware
-float calibration = 0;
-float a = 0;
-float b = 0;
-int ia = 0;
-int ib = 0;
-float m = 0;
-float l = 0;
-float lm;
-int i;
-int f;
+unsigned long ain1, ain2, ain3;
+
 
 unsigned int getPercent(unsigned long ADCvalue){
 	unsigned pct = ADCvalue/40;
@@ -66,9 +54,6 @@ unsigned int getPercent(unsigned long ADCvalue){
 	return pct;
 }
 
-unsigned int getCm(unsigned long ADCvalue){
-	return 2.1955322 + 38701.8148/ADCvalue;
-}
 
 void delay(unsigned long int time)    // This function provides delay in terms of seconds
 {
@@ -85,28 +70,8 @@ void delay(unsigned long int time)    // This function provides delay in terms o
 		}
 }
 
-unsigned int getAbs(int n) 
-{ 
-  int const mask = n >> (sizeof(int) * 8 - 1); 
-  return ((n + mask) ^ mask); 
-} 
 
-unsigned int getLookup(unsigned long ADCvalue){
-	//innaccurate after 45cm
-	int adcOutput[15] = {2930, 2144, 1640, 1350, 1150,  928,  900, 880, 840, 790, 650, 630, 530};
-	int distance[15] =  {  10,   15,   20,   25,   30,   35,   40,  45,  50,  55,  60,  65,  70};
-	unsigned int closest = getAbs(ADCvalue-adcOutput[0]);
-	unsigned int val = distance[0];
-	unsigned int i = 0;
-	
-	for (i = 0; i < 15; i++){
-		if (  (getAbs(adcOutput[i]-ADCvalue)) < closest ){
-				closest = getAbs(ADCvalue-adcOutput[i]);
-				val = distance[i];
-		}
-	}
-	return val;
-}
+
 
 
 int main(void){
@@ -130,57 +95,9 @@ int main(void){
 			
 			//Update Sensors
 			// Find distance
-		for(i = 0; i < 15; i = i + 1){
-			if(ain1 > adcTable[i]){
-				break;
-			}
-			else{
-				a = adcTable[i+1];
-				ia = i+1;
-			}
-		}
 		
-		for(f = 0; f < 15; f = f + 1){
-			if(ain1 < adcTable[f]){
-				b = adcTable[f];
-				ib = f;
-			}
-			else {
-				break;
-			}
-		}
-		 m = b - a;
-		 l = b - ain1;
-		lm = l / m ;
-		
-		dist1 = distTable[ib] + (lm * 5);
-		// Find distance
-		for(i = 0; i < 15; i = i + 1){
-			if(ain2 > adcTable[i]){
-				break;
-			}
-			else{
-				a = adcTable[i+1];
-				ia = i+1;
-			}
-		}
-		
-		for(f = 0; f < 15; f = f + 1){
-			if(ain2 < adcTable[f]){
-				b = adcTable[f];
-				ib = f;
-			}
-			else {
-				break;
-			}
-		}
-		 m = b - a;
-		 l = b - ain2;
-		lm = l / m ;
-		
-		dist2 = distTable[ib] + (lm * 5);
-		// END ADC PART OF LOOP
-		
+		dist1 = getCm(ain1);
+		dist2 = getCm(ain2);
 		
 		Display_Info(potentiometer,dist1,dist2);
 		
@@ -188,7 +105,7 @@ int main(void){
 		PWM0B_Duty(100);
 		
 		// Control logic
-		if ((dist1 > 50 && dist2 > 50) || (dist1 == 13 && dist2 == 17)){
+		if (dist1 > 60 && dist2 > 60){
 			//stop
 			Change_LED('R');
 			PWM0A_Duty(0);
