@@ -1,3 +1,18 @@
+void delay(unsigned long int time)    // This function provides delay in terms of seconds
+{
+		//Roughly 1 second delay on 16MHz TM4C
+    unsigned char i,j,k,l;
+ 
+    for(i = 0; i < time; i++){
+        for(j=0; j<250; j++){
+					for(k=0; k< 250; k++){
+						for (l=0; l< 60; l++){
+						}
+					}
+				}
+		}
+}
+
 float getCm(unsigned long ADCvalue){
 	int adcTable[] = {4095, 3050, 1980, 1370, 950, 830, 730, 650, 570, 530, 460, 390, 330, 300, 0};
 	int distTable[] = {0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 999};
@@ -37,4 +52,10 @@ float getCm(unsigned long ADCvalue){
 		
 		float distance = distTable[ib] + (lm * 5);
 		return distance;
+}
+
+unsigned int getPercent(unsigned long ADCvalue){
+	unsigned pct = ADCvalue/40;
+	if (pct >= 100)	pct = 100;
+	return pct;
 }

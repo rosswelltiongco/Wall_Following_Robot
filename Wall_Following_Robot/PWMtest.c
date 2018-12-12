@@ -32,50 +32,14 @@
 // Function prototypes
 void PortF_Init(void);
 void PortB_Init(void);
-void delay(unsigned long int time);
 void Change_B_Polarity(void);
 void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2 );
 void Change_LED(char color);
 
-// Global Variables
-unsigned int speed = 0;
-unsigned int speedValues[] = {0, 25, 50, 75, 100};
-char status = 'R'; //Initialize to red status
-char lastStatus = 'G'; //Initialize to red status
-
-// SENSOR VARIABLES
-float dist1, dist2;
-unsigned long ain1, ain2, ain3;
-
-
-unsigned int getPercent(unsigned long ADCvalue){
-	unsigned pct = ADCvalue/40;
-	if (pct >= 100)	pct = 100;
-	return pct;
-}
-
-
-void delay(unsigned long int time)    // This function provides delay in terms of seconds
-{
-		//Roughly 1 second delay on 16MHz TM4C
-    unsigned char i,j,k,l;
- 
-    for(i = 0; i < time; i++){
-        for(j=0; j<250; j++){
-					for(k=0; k< 250; k++){
-						for (l=0; l< 60; l++){
-						}
-					}
-				}
-		}
-}
-
-
-
-
 
 int main(void){
-	unsigned long potentiometer, sensor1, sensor2, percent;
+	float dist1, dist2;
+	unsigned long ain1, ain2, ain3;
 	ADC_Init298();
 	PortB_Init();
 	PortF_Init();
@@ -85,21 +49,15 @@ int main(void){
 	PLL_Init();           // bus clock at 80 MHz
 	Change_LED('G');
 	
-	// Initialize speeds based on potentiometer
-	signed int leftSpeed = getPercent(potentiometer);
-	signed int rightSpeed = getPercent(potentiometer);
+	
 	
   while(1){
 		ADC_In298(&ain1, &ain2, &ain3); // Ensure sampler works
-		// ADC PART OF LOOP	
-			
-			//Update Sensors
-			// Find distance
 		
 		dist1 = getCm(ain1);
 		dist2 = getCm(ain2);
 		
-		Display_Info(potentiometer,dist1,dist2);
+		Display_Info(0,dist1,dist2);
 		
 		PWM0A_Duty(100);
 		PWM0B_Duty(100);
@@ -169,8 +127,6 @@ void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned l
 	
 }
 
-
-// Unused functions for future use
 void Change_B_Polarity(void){
 	GPIO_PORTB_DATA_R ^= 0x0C;
 }
