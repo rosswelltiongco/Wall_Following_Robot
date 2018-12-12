@@ -34,7 +34,7 @@ void PortB_Init(void);
 void delay(unsigned long int time);
 void Change_B_Polarity(void);
 void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2 );
-
+void Change_LED(char color);
 
 // Global Variables
 unsigned int speed = 0;
@@ -118,6 +118,7 @@ int main(void){
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz
 	PLL_Init();           // bus clock at 80 MHz
+	Change_LED('G');
 	
 	// Initialize speeds based on potentiometer
 	signed int leftSpeed = getPercent(potentiometer);
@@ -180,13 +181,21 @@ int main(void){
 		dist2 = distTable[ib] + (lm * 5);
 		// END ADC PART OF LOOP
 		
-		unsigned int leftDistance = getCm(sensor1);
-		unsigned int rightDistance = getCm(sensor2);
 		
 		Display_Info(potentiometer,dist1,dist2);
 		
-		PWM0A_Duty(0);
-		PWM0B_Duty(0);
+		PWM0A_Duty(100);
+		PWM0B_Duty(100);
+		
+		// Control logic
+		if ((dist1 > 50 && dist2 > 50) || (dist1 == 13 && dist2 == 17)){
+			//stop
+			Change_LED('R');
+			PWM0A_Duty(0);
+			PWM0B_Duty(0);
+			while(1){
+			}
+		}
   }
 }
 
@@ -247,4 +256,21 @@ void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned l
 // Unused functions for future use
 void Change_B_Polarity(void){
 	GPIO_PORTB_DATA_R ^= 0x0C;
+}
+
+void Change_LED(char color){
+	// Port F Onboard LED Color Codes
+	// Color    LED(s) PortF
+	// dark     ---    0
+	// red      R--    0x02
+	// blue     --B    0x04
+	// green    -G-    0x08
+	// yellow   RG-    0x0A
+	// sky blue -GB    0x0C	
+	// white    RGB    0x0E
+	// pink     R-B    0x06
+	if (color == 'R') GPIO_PORTF_DATA_R = 0x02;
+	if (color == 'B') GPIO_PORTF_DATA_R = 0x04;
+	if (color == 'G') GPIO_PORTF_DATA_R = 0x08;
+	if (color == 'X') GPIO_PORTF_DATA_R = 0x00;
 }
