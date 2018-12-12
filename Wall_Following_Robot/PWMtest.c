@@ -40,6 +40,7 @@ void Change_LED(char color);
 int main(void){
 	float dist1, dist2;
 	unsigned long ain1, ain2, ain3;
+	unsigned char dir = 'X';
 	ADC_Init298();
 	PortB_Init();
 	PortF_Init();
@@ -47,28 +48,78 @@ int main(void){
 	PWM0A_Init(40000);         // initialize PWM0, 1000 Hz
   PWM0B_Init(40000);         // initialize PWM0, 1000 Hz
 	PLL_Init();           // bus clock at 80 MHz
-	Change_LED('G');
-	
-	
+	//Change_LED('G');
 	
   while(1){
-		ADC_In298(&ain1, &ain2, &ain3); // Ensure sampler works
+		ADC_In298(&ain1, &ain2, &ain3);
+
+		Display_Info(dir,dist1,dist2);
 		
 		dist1 = getCm(ain1);
 		dist2 = getCm(ain2);
 		
-		Display_Info(0,dist1,dist2);
-		
-		PWM0A_Duty(100);
-		PWM0B_Duty(100);
-		
-		// Control logic
-		if (dist1 > 60 && dist2 > 60){
-			//stop
+		/*
+		// Sorta alright
+		if (dist1 <= 30){ // dist1 < dist2 //15 /17
+			Change_LED('B');
+			dir = 'L';
+			PWM0A_Duty(55);
+			PWM0B_Duty(45);
+		}
+		else if (dist2 <= 30){ //dist2 < dist1 //15 //15
 			Change_LED('R');
+			dir = 'R';
+			PWM0A_Duty(45);
+			PWM0B_Duty(55);
+		}
+		else{
+			Change_LED('G');
+			dir = 'S';
+			PWM0A_Duty(50);
+			PWM0B_Duty(50);
+		}
+		*/
+		
+		/*
+		//Overshooting logic
+		if (dist1 < 20 && dist2 > 40){
+			PWM0A_Duty(50);
+			PWM0B_Duty(70);
+		}
+		if (dist2 < 20 && dist1 > 40){
+			PWM0A_Duty(70);
+			PWM0B_Duty(50);
+		}
+		*/
+		
+		// Relativity
+		if (getAbs(dist1-dist2) < 20){
+			Change_LED('G');
+			PWM0A_Duty(50);
+			PWM0B_Duty(50);
+		}
+		else if (dist1 < dist2){
+			Change_LED('B');
+			PWM0A_Duty(55);
+			PWM0B_Duty(45);
+		}
+		else if (dist2 <dist1){
+			Change_LED('R');
+			PWM0A_Duty(45);
+			PWM0B_Duty(55);
+		}
+		
+		
+		// Stopping logic
+		if (dist1 > 65 && dist2 > 65){
+			//stop
 			PWM0A_Duty(0);
 			PWM0B_Duty(0);
 			while(1){
+				Change_LED('R');
+				delay(1);
+				Change_LED('X');
+				delay(1);
 			}
 		}
   }
@@ -105,13 +156,12 @@ void PortB_Init(void){
   GPIO_PORTB_DIR_R = 0x0F;          // 5) PB2-PB0 output 
   GPIO_PORTB_AFSEL_R = 0x00;        // 6) no alterna=te function
   GPIO_PORTB_DEN_R = 0x0F;          // 7) enable digital pins PB2-PB0    
-	GPIO_PORTB_DATA_R = 0x08;          // Initialize PB0 high, PB1 kept low
+	GPIO_PORTB_DATA_R = 0x04;          // Initialize PB0 high, PB1 kept low
 }
 
 
 
-void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned long sensor2){
-	unsigned int percent = getPercent(potentiometer);
+void Display_Info(unsigned long direction, unsigned long sensor1, unsigned long sensor2){
 	Nokia5110_Clear();
   Nokia5110_OutString("L:");
 	Nokia5110_OutUDec((sensor1));
@@ -121,8 +171,8 @@ void Display_Info(unsigned long potentiometer, unsigned long sensor1, unsigned l
 	Nokia5110_OutUDec((sensor2));
 	
 	Nokia5110_SetCursor(0, 4);
-	Nokia5110_OutString("PWM");
-	Nokia5110_OutUDec(percent);
+	Nokia5110_OutString("DIR");
+	Nokia5110_OutUDec(direction);
 	delay(1);
 	
 }

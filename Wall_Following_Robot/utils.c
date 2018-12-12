@@ -59,3 +59,9 @@ unsigned int getPercent(unsigned long ADCvalue){
 	if (pct >= 100)	pct = 100;
 	return pct;
 }
+
+unsigned int getAbs(int n) 
+{ 
+  int const mask = n >> (sizeof(int) * 8 - 1); 
+  return ((n + mask) ^ mask); 
+} 
