@@ -39,6 +39,7 @@ void Change_LED(char color);
 
 int main(void){
 	float dist1, dist2, middle;
+	unsigned int endCounter = 0;
 	unsigned long ain1, ain2, ain3;
 	unsigned char dir = 'X';
 	ADC_Init298();
@@ -60,7 +61,7 @@ int main(void){
 		middle = getCm(ain3);
 		
 		// Stopping logic
-		if (dist1 > 65 && dist2 > 65){
+		if (dist1 > 70 && dist2 > 70 && middle > 70){ // 65-65
 			PWM0A_Duty(0);
 			PWM0B_Duty(0);
 			while(1){
@@ -71,27 +72,45 @@ int main(void){
 			}
 		}
 		
+		/*
+		// Stopping logic for reverse track
+		if (dist1 > 20){
+			endCounter+=20;
+			if (endCounter > 100){
+				while(1){
+				Change_LED('R');
+				delay(1);
+				Change_LED('X');
+				delay(1);
+				}
+			}
+		}
+		endCounter = 0; // Reset counter if it doesn't stay
+		*/
+		
 		// Relativity
-		if (getAbs(dist1-dist2) < 20){
+		if (getAbs(dist1-dist2) < 20){ //20
 			// Maintain speed
 			Change_LED('G');
 			PWM0A_Duty(50);
 			PWM0B_Duty(50);
 		}
 		
-		else if (dist1 > 50 && middle < 50){ //65
+
+		else if (dist1 > 60){// && middle < 50){ // 50-50 //40
 			// Left turn
 			Change_LED('B');
-			PWM0A_Duty(40); //40
-			PWM0B_Duty(60); //60
+			PWM0A_Duty(40); // 40
+			PWM0B_Duty(55); // 60
 		}
-		else if (dist2 > 50 && middle < 50){ //65
+		/*
+		else if (dist2 > 60){// && middle < 50){ // 50-50 //40
 			// Right turn
 			Change_LED('R');
-			PWM0A_Duty(60); //60
-			PWM0B_Duty(40); //40
+			PWM0A_Duty(55); // 55
+			PWM0B_Duty(40); // 40
 		}
-		
+		*/
 		else if (dist1 < dist2){
 			// Speed up left
 			Change_LED('Y');
