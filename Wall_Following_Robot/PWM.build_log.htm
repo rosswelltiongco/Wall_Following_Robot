@@ -14,11 +14,13 @@ compiling PWM.c...
 compiling PWMtest.c...
 utils.h(10): warning:  #1-D: last line of file ends without a newline
   unsigned int getAbs(int n);
+PWMtest.c(43): warning:  #177-D: variable "dir" was declared but never referenced
+        unsigned char dir = 'X';
 PWMtest.c(132): warning:  #550-D: variable "delay" was set but never used
         unsigned int delay;
-PWMtest.c(180): warning:  #1-D: last line of file ends without a newline
+PWMtest.c(181): warning:  #1-D: last line of file ends without a newline
   }
-PWMtest.c: 3 warnings, 0 errors
+PWMtest.c: 4 warnings, 0 errors
 compiling Nokia5110.c...
 compiling ADCSWTrigger.c...
 compiling utils.c...
@@ -32,10 +34,14 @@ utils.c(67): warning:  #1-D: last line of file ends without a newline
   } 
 utils.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=7222 RO-data=618 RW-data=0 ZI-data=1120  
-".\PWM.axf" - 0 Error(s), 7 Warning(s).
+Program Size: Code=7246 RO-data=618 RW-data=0 ZI-data=1120  
+".\PWM.axf" - 0 Error(s), 8 Warning(s).
 Load "C:\\Users\\Rosswell\\Documents\\Wall_Following_Robot\\Wall_Following_Robot\\PWM.axf" 
 Connecting: Mode=JTAG, Speed=1000000Hz
+Erase Done.
+Programming Done.
+Verify OK.
+peed=1000000Hz
 Erase Done.
 Programming Done.
 Verify OK.

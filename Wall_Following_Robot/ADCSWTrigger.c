@@ -84,7 +84,7 @@ void ADC_Init298(void){
 // Input: none
 // Output: three 12-bit result of ADC conversions
 // Samples AIN8, AIN9, and AIN2
-// 125k max sampling
+// 125k max samplingo
 // software trigger, busy-wait sampling
 // data returned by reference
 // ain2 (PE1) 0 to 4095

@@ -38,7 +38,7 @@ void Change_LED(char color);
 
 
 int main(void){
-	float dist1, dist2;
+	float dist1, dist2, middle;
 	unsigned long ain1, ain2, ain3;
 	unsigned char dir = 'X';
 	ADC_Init298();
@@ -53,14 +53,14 @@ int main(void){
   while(1){
 		ADC_In298(&ain1, &ain2, &ain3);
 
-		Display_Info(dir,dist1,dist2);
+		Display_Info(middle,dist1,dist2);
 		
 		dist1 = getCm(ain1);
 		dist2 = getCm(ain2);
-
+		middle = getCm(ain3);
+		
 		// Stopping logic
 		if (dist1 > 65 && dist2 > 65){
-			//stop
 			PWM0A_Duty(0);
 			PWM0B_Duty(0);
 			while(1){
@@ -78,27 +78,27 @@ int main(void){
 			PWM0A_Duty(50);
 			PWM0B_Duty(50);
 		}
-		else if (dist1 > 65){
+		else if (dist1 > 60){ //65
 			// Left turn
 			Change_LED('B');
-			PWM0A_Duty(40);
-			PWM0B_Duty(60);
+			PWM0A_Duty(40); //40
+			PWM0B_Duty(55); //60
 		}
-		else if (dist2 > 65){
+		else if (dist2 > 60){ //65
 			// Right turn
 			Change_LED('R');
-			PWM0A_Duty(60);
-			PWM0B_Duty(40);
+			PWM0A_Duty(55); //60
+			PWM0B_Duty(40); //40
 		}
 		else if (dist1 < dist2){
 			// Speed up left
-			Change_LED('X');
+			Change_LED('Y');
 			PWM0A_Duty(55);
 			PWM0B_Duty(45);
 		}
 		else if (dist2 < dist1){
 			// Speed up right
-			Change_LED('X');
+			Change_LED('Y');
 			PWM0A_Duty(45);
 			PWM0B_Duty(55);
 		}
@@ -152,7 +152,7 @@ void Display_Info(unsigned long direction, unsigned long sensor1, unsigned long 
 	Nokia5110_OutUDec((sensor2));
 	
 	Nokia5110_SetCursor(0, 4);
-	Nokia5110_OutString("DIR");
+	Nokia5110_OutString("M");
 	Nokia5110_OutUDec(direction);
 	delay(1);
 	
@@ -176,5 +176,6 @@ void Change_LED(char color){
 	if (color == 'R') GPIO_PORTF_DATA_R = 0x02;
 	if (color == 'B') GPIO_PORTF_DATA_R = 0x04;
 	if (color == 'G') GPIO_PORTF_DATA_R = 0x08;
+	if (color == 'Y') GPIO_PORTF_DATA_R = 0x0A;
 	if (color == 'X') GPIO_PORTF_DATA_R = 0x00;
 }
