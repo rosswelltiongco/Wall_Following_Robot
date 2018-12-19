@@ -78,18 +78,20 @@ int main(void){
 			PWM0A_Duty(50);
 			PWM0B_Duty(50);
 		}
-		else if (dist1 > 60){ //65
+		
+		else if (dist1 > 50 && middle < 50){ //65
 			// Left turn
 			Change_LED('B');
 			PWM0A_Duty(40); //40
-			PWM0B_Duty(55); //60
+			PWM0B_Duty(60); //60
 		}
-		else if (dist2 > 60){ //65
+		else if (dist2 > 50 && middle < 50){ //65
 			// Right turn
 			Change_LED('R');
-			PWM0A_Duty(55); //60
+			PWM0A_Duty(60); //60
 			PWM0B_Duty(40); //40
 		}
+		
 		else if (dist1 < dist2){
 			// Speed up left
 			Change_LED('Y');
