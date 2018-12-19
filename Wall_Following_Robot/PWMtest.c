@@ -57,59 +57,7 @@ int main(void){
 		
 		dist1 = getCm(ain1);
 		dist2 = getCm(ain2);
-		
-		/*
-		// Sorta alright
-		if (dist1 <= 30){ // dist1 < dist2 //15 /17
-			Change_LED('B');
-			dir = 'L';
-			PWM0A_Duty(55);
-			PWM0B_Duty(45);
-		}
-		else if (dist2 <= 30){ //dist2 < dist1 //15 //15
-			Change_LED('R');
-			dir = 'R';
-			PWM0A_Duty(45);
-			PWM0B_Duty(55);
-		}
-		else{
-			Change_LED('G');
-			dir = 'S';
-			PWM0A_Duty(50);
-			PWM0B_Duty(50);
-		}
-		*/
-		
-		/*
-		//Overshooting logic
-		if (dist1 < 20 && dist2 > 40){
-			PWM0A_Duty(50);
-			PWM0B_Duty(70);
-		}
-		if (dist2 < 20 && dist1 > 40){
-			PWM0A_Duty(70);
-			PWM0B_Duty(50);
-		}
-		*/
-		
-		// Relativity
-		if (getAbs(dist1-dist2) < 20){
-			Change_LED('G');
-			PWM0A_Duty(50);
-			PWM0B_Duty(50);
-		}
-		else if (dist1 < dist2){
-			Change_LED('B');
-			PWM0A_Duty(55);
-			PWM0B_Duty(45);
-		}
-		else if (dist2 <dist1){
-			Change_LED('R');
-			PWM0A_Duty(45);
-			PWM0B_Duty(55);
-		}
-		
-		
+
 		// Stopping logic
 		if (dist1 > 65 && dist2 > 65){
 			//stop
@@ -122,6 +70,39 @@ int main(void){
 				delay(1);
 			}
 		}
+		
+		// Relativity
+		if (getAbs(dist1-dist2) < 20){
+			// Maintain speed
+			Change_LED('G');
+			PWM0A_Duty(50);
+			PWM0B_Duty(50);
+		}
+		else if (dist1 > 65){
+			// Left turn
+			Change_LED('B');
+			PWM0A_Duty(40);
+			PWM0B_Duty(60);
+		}
+		else if (dist2 > 65){
+			// Right turn
+			Change_LED('R');
+			PWM0A_Duty(60);
+			PWM0B_Duty(40);
+		}
+		else if (dist1 < dist2){
+			// Speed up left
+			Change_LED('X');
+			PWM0A_Duty(55);
+			PWM0B_Duty(45);
+		}
+		else if (dist2 < dist1){
+			// Speed up right
+			Change_LED('X');
+			PWM0A_Duty(45);
+			PWM0B_Duty(55);
+		}
+		
   }
 }
 
